@@ -20,8 +20,6 @@ Project is a fork of **[CodeWalker](https://github.com/dexyfex/CodeWalker)** and
 
 **Additonal Copyright Notices** |
 :-------------------------------|
-Contains source code for FBX file format reading and writing from:
-
-https://github.com/hamish-milne/FbxWriter
-
-Published under GPL license, for full terms and conditions see the above link.
+Contains source code for FBX file format reading and writing from: |
+https://github.com/hamish-milne/FbxWriter |
+Published under GPL license, for full terms and conditions see the above link. |
