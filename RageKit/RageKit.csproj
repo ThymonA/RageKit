@@ -2,6 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
+    <Version>1.0.1</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>ThymonA</Authors>
+    <Company />
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/ThymonA/RageKit</PackageProjectUrl>
+    <PackageIcon>RageKit.png</PackageIcon>
+    <RepositoryUrl>https://github.com/ThymonA/RageKit</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <PackageTags>RageKit, FiveM, GTA5, RPF, Texture, ytd, ymap, meta</PackageTags>
+    <Copyright>https://github.com/ThymonA/RageKit/blob/master/LICENSE</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +26,18 @@
 
   <ItemGroup>
     <Resource Include="Resources\magic.dat" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="RageKit.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
