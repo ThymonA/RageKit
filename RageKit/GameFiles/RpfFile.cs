@@ -2742,13 +2742,8 @@ namespace RageKit.GameFiles
         void Load(byte[] data, RpfFileEntry entry);
     }
 
-
-
-
-
-
-
-
-
-
+    public interface ExportFile
+    {
+        byte[] Export();
+    }
 }

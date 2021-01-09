@@ -5,12 +5,15 @@
     using System.Linq;
     using System.Xml;
 
+    using RageKit.Extensions;
+
     using SharpDX;
 
+    using Encoding = System.Text.Encoding;
     using EXP = System.ComponentModel.ExpandableObjectConverter;
     using TC = System.ComponentModel.TypeConverterAttribute;
 
-    public class VehicleHandlingFile : GameFile, PackedFile
+    public class VehicleHandlingFile : GameFile, PackedFile, ExportFile
     {
         public List<VehicleHandlingData> Handlings { get; set; }
 
@@ -43,7 +46,25 @@
             }
         }
 
-        private void LoadHandlings(XmlDocument doc)
+        public byte[] Export()
+        {
+            var document = new XmlDocument();
+
+            document.CreateXmlDeclaration("1.0", "UTF-8", null);
+
+            var cHandlingDataMgr = document.CreateElement("CHandlingDataMgr");
+            var handlingData = document.CreateElement("HandlingData");
+            var nodes = Handlings.Select(vhd => vhd.Export(document));
+
+            foreach (var node in nodes) { handlingData.AppendChild(node); }
+
+            cHandlingDataMgr.AppendChild(handlingData);
+            document.AppendChild(cHandlingDataMgr);
+
+            return Encoding.UTF8.GetBytes(document.OuterXml);
+        }
+
+        private void LoadHandlings(XmlNode doc)
         {
             var nodes = doc.SelectNodes("CHandlingDataMgr/HandlingData/Item | CHandlingDataMgr/HandlingData/item");
 
@@ -65,6 +86,8 @@
         public abstract string type { get; }
 
         public abstract void Load(XmlNode node);
+
+        public abstract XmlNode Export(XmlDocument document);
 
         public T As<T>()
             where T : SubHandlingData
@@ -189,6 +212,43 @@
             fProwRaiseMult = Xml.GetChildFloatAttribute(node, nameof(fProwRaiseMult));
             fDeepWaterSampleBuoyancyMult = Xml.GetChildFloatAttribute(node, nameof(fDeepWaterSampleBuoyancyMult));
         }
+
+        public override XmlNode Export(XmlDocument document)
+        {
+            var item = document.CreateElement("Item");
+
+            item.SetAttribute("type", type);
+
+            document.AddChildWithAttribute(item, nameof(fBoxFrontMult), fBoxFrontMult);
+            document.AddChildWithAttribute(item, nameof(fBoxRearMult), fBoxRearMult);
+            document.AddChildWithAttribute(item, nameof(fBoxSideMult), fBoxSideMult);
+            document.AddChildWithAttribute(item, nameof(fSampleTop), fSampleTop);
+            document.AddChildWithAttribute(item, nameof(fSampleBottom), fSampleBottom);
+            document.AddChildWithAttribute(item, nameof(fAquaplaneForce), fAquaplaneForce);
+            document.AddChildWithAttribute(item, nameof(fAquaplanePushWaterMult), fAquaplanePushWaterMult);
+            document.AddChildWithAttribute(item, nameof(fAquaplanePushWaterCap), fAquaplanePushWaterCap);
+            document.AddChildWithAttribute(item, nameof(fAquaplanePushWaterApply), fAquaplanePushWaterApply);
+            document.AddChildWithAttribute(item, nameof(fRudderForce), fRudderForce);
+            document.AddChildWithAttribute(item, nameof(fRudderOffsetSubmerge), fRudderOffsetSubmerge);
+            document.AddChildWithAttribute(item, nameof(fRudderOffsetForce), fRudderOffsetForce);
+            document.AddChildWithAttribute(item, nameof(fRudderOffsetForceZMult), fRudderOffsetForceZMult);
+            document.AddChildWithAttribute(item, nameof(fWaveAudioMult), fWaveAudioMult);
+            document.AddChildWithAttribute(item, nameof(vecMoveResistance), vecMoveResistance);
+            document.AddChildWithAttribute(item, nameof(vecTurnResistance), vecTurnResistance);
+            document.AddChildWithAttribute(item, nameof(fLook_L_R_CamHeight), fLook_L_R_CamHeight);
+            document.AddChildWithAttribute(item, nameof(fDragCoefficient), fDragCoefficient);
+            document.AddChildWithAttribute(item, nameof(fKeelSphereSize), fKeelSphereSize);
+            document.AddChildWithAttribute(item, nameof(fPropRadius), fPropRadius);
+            document.AddChildWithAttribute(item, nameof(fLowLodAngOffset), fLowLodAngOffset);
+            document.AddChildWithAttribute(item, nameof(fLowLodDraughtOffset), fLowLodDraughtOffset);
+            document.AddChildWithAttribute(item, nameof(fImpellerOffset), fImpellerOffset);
+            document.AddChildWithAttribute(item, nameof(fImpellerForceMult), fImpellerForceMult);
+            document.AddChildWithAttribute(item, nameof(fDinghySphereBuoyConst), fDinghySphereBuoyConst);
+            document.AddChildWithAttribute(item, nameof(fProwRaiseMult), fProwRaiseMult);
+            document.AddChildWithAttribute(item, nameof(fDeepWaterSampleBuoyancyMult), fDeepWaterSampleBuoyancyMult);
+
+            return item;
+        }
     }
 
     [TC(typeof(EXP))]
@@ -238,6 +298,36 @@
             fBikeOnStandLeanAngle = Xml.GetChildFloatAttribute(node, nameof(fBikeOnStandLeanAngle));
             fBikeOnStandSteerAngle = Xml.GetChildFloatAttribute(node, nameof(fBikeOnStandSteerAngle));
             fJumpForce = Xml.GetChildFloatAttribute(node, nameof(fJumpForce));
+        }
+
+        public override XmlNode Export(XmlDocument document)
+        {
+            var item = document.CreateElement("Item");
+
+            item.SetAttribute("type", type);
+
+            document.AddChildWithAttribute(item, nameof(fLeanFwdCOMMult), fLeanFwdCOMMult);
+            document.AddChildWithAttribute(item, nameof(fLeanFwdForceMult), fLeanFwdForceMult);
+            document.AddChildWithAttribute(item, nameof(fLeanBakCOMMult), fLeanBakCOMMult);
+            document.AddChildWithAttribute(item, nameof(fLeanBakForceMult), fLeanBakForceMult);
+            document.AddChildWithAttribute(item, nameof(fMaxBankAngle), fMaxBankAngle);
+            document.AddChildWithAttribute(item, nameof(fFullAnimAngle), fFullAnimAngle);
+            document.AddChildWithAttribute(item, nameof(fDesLeanReturnFrac), fDesLeanReturnFrac);
+            document.AddChildWithAttribute(item, nameof(fStickLeanMult), fStickLeanMult);
+            document.AddChildWithAttribute(item, nameof(fBrakingStabilityMult), fBrakingStabilityMult);
+            document.AddChildWithAttribute(item, nameof(fInAirSteerMult), fInAirSteerMult);
+            document.AddChildWithAttribute(item, nameof(fWheelieBalancePoint), fWheelieBalancePoint);
+            document.AddChildWithAttribute(item, nameof(fStoppieBalancePoint), fStoppieBalancePoint);
+            document.AddChildWithAttribute(item, nameof(fWheelieSteerMult), fWheelieSteerMult);
+            document.AddChildWithAttribute(item, nameof(fRearBalanceMult), fRearBalanceMult);
+            document.AddChildWithAttribute(item, nameof(fFrontBalanceMult), fFrontBalanceMult);
+            document.AddChildWithAttribute(item, nameof(fBikeGroundSideFrictionMult), fBikeGroundSideFrictionMult);
+            document.AddChildWithAttribute(item, nameof(fBikeWheelGroundSideFrictionMult), fBikeWheelGroundSideFrictionMult);
+            document.AddChildWithAttribute(item, nameof(fBikeOnStandLeanAngle), fBikeOnStandLeanAngle);
+            document.AddChildWithAttribute(item, nameof(fBikeOnStandSteerAngle), fBikeOnStandSteerAngle);
+            document.AddChildWithAttribute(item, nameof(fJumpForce), fJumpForce);
+
+            return item;
         }
     }
 
@@ -317,6 +407,50 @@
             fSubmergeLevelToPullHeliUnderwater = Xml.GetChildFloatAttribute(node, nameof(fSubmergeLevelToPullHeliUnderwater));
             handlingType = Xml.GetChildInnerText(node, nameof(handlingType));
         }
+
+        public override XmlNode Export(XmlDocument document)
+        {
+            var item = document.CreateElement("Item");
+
+            item.SetAttribute("type", type);
+
+            document.AddChildWithAttribute(item, nameof(fThrust), fThrust);
+            document.AddChildWithAttribute(item, nameof(fThrustFallOff), fThrustFallOff);
+            document.AddChildWithAttribute(item, nameof(fThrustVectoring), fThrustVectoring);
+            document.AddChildWithAttribute(item, nameof(fYawMult), fYawMult);
+            document.AddChildWithAttribute(item, nameof(fYawStabilise), fYawStabilise);
+            document.AddChildWithAttribute(item, nameof(fSideSlipMult), fSideSlipMult);
+            document.AddChildWithAttribute(item, nameof(fRollMult), fRollMult);
+            document.AddChildWithAttribute(item, nameof(fRollStabilise), fRollStabilise);
+            document.AddChildWithAttribute(item, nameof(fPitchMult), fPitchMult);
+            document.AddChildWithAttribute(item, nameof(fPitchStabilise), fPitchStabilise);
+            document.AddChildWithAttribute(item, nameof(fFormLiftMult), fFormLiftMult);
+            document.AddChildWithAttribute(item, nameof(fAttackLiftMult), fAttackLiftMult);
+            document.AddChildWithAttribute(item, nameof(fAttackDiveMult), fAttackDiveMult);
+            document.AddChildWithAttribute(item, nameof(fGearDownDragV), fGearDownDragV);
+            document.AddChildWithAttribute(item, nameof(fGearDownLiftMult), fGearDownLiftMult);
+            document.AddChildWithAttribute(item, nameof(fWindMult), fWindMult);
+            document.AddChildWithAttribute(item, nameof(fMoveRes), fMoveRes);
+            document.AddChildWithAttribute(item, nameof(vecTurnRes), vecTurnRes);
+            document.AddChildWithAttribute(item, nameof(vecSpeedRes), vecSpeedRes);
+            document.AddChildWithAttribute(item, nameof(fGearDoorFrontOpen), fGearDoorFrontOpen);
+            document.AddChildWithAttribute(item, nameof(fGearDoorRearOpen), fGearDoorRearOpen);
+            document.AddChildWithAttribute(item, nameof(fGearDoorRearOpen2), fGearDoorRearOpen2);
+            document.AddChildWithAttribute(item, nameof(fGearDoorRearMOpen), fGearDoorRearMOpen);
+            document.AddChildWithAttribute(item, nameof(fTurublenceMagnitudeMax), fTurublenceMagnitudeMax);
+            document.AddChildWithAttribute(item, nameof(fTurublenceForceMulti), fTurublenceForceMulti);
+            document.AddChildWithAttribute(item, nameof(fTurublenceRollTorqueMulti), fTurublenceRollTorqueMulti);
+            document.AddChildWithAttribute(item, nameof(fTurublencePitchTorqueMulti), fTurublencePitchTorqueMulti);
+            document.AddChildWithAttribute(item, nameof(fBodyDamageControlEffectMult), fBodyDamageControlEffectMult);
+            document.AddChildWithAttribute(item, nameof(fInputSensitivityForDifficulty), fInputSensitivityForDifficulty);
+            document.AddChildWithAttribute(item, nameof(fOnGroundYawBoostSpeedPeak), fOnGroundYawBoostSpeedPeak);
+            document.AddChildWithAttribute(item, nameof(fOnGroundYawBoostSpeedCap), fOnGroundYawBoostSpeedCap);
+            document.AddChildWithAttribute(item, nameof(fEngineOffGlideMulti), fEngineOffGlideMulti);
+            document.AddChildWithAttribute(item, nameof(fSubmergeLevelToPullHeliUnderwater), fSubmergeLevelToPullHeliUnderwater);
+            document.AddChildInnerText(item, nameof(handlingType), handlingType);
+
+            return item;
+        }
     }
 
     [TC(typeof(EXP))]
@@ -353,6 +487,28 @@
             fMiscGadgetVar = Xml.GetChildFloatAttribute(node, nameof(fMiscGadgetVar));
             fWheelImpactOffset = Xml.GetChildFloatAttribute(node, nameof(fWheelImpactOffset));
         }
+
+        public override XmlNode Export(XmlDocument document)
+        {
+            var item = document.CreateElement("Item");
+
+            item.SetAttribute("type", type);
+
+            document.AddChildInnerItemArray(item, nameof(uWeaponHash), uWeaponHash);
+            document.AddChildContentArray(item, nameof(WeaponSeats), WeaponSeats);
+            document.AddChildContentArray(item, nameof(fTurretSpeed), fTurretSpeed);
+            document.AddChildContentArray(item, nameof(fTurretPitchMin), fTurretPitchMin);
+            document.AddChildContentArray(item, nameof(fTurretPitchMax), fTurretPitchMax);
+            document.AddChildContentArray(item, nameof(fTurretCamPitchMin), fTurretCamPitchMin);
+            document.AddChildContentArray(item, nameof(fTurretCamPitchMax), fTurretCamPitchMax);
+            document.AddChildContentArray(item, nameof(fBulletVelocityForGravity), fBulletVelocityForGravity);
+            document.AddChildContentArray(item, nameof(fTurretPitchForwardMin), fTurretPitchForwardMin);
+            document.AddChildWithAttribute(item, nameof(fUvAnimationMult), fUvAnimationMult);
+            document.AddChildWithAttribute(item, nameof(fMiscGadgetVar), fMiscGadgetVar);
+            document.AddChildWithAttribute(item, nameof(fWheelImpactOffset), fWheelImpactOffset);
+
+            return item;
+        }
     }
 
     [TC(typeof(EXP))]
@@ -380,6 +536,25 @@
             vTurnRes = Xml.GetChildVector3Attributes(node, nameof(vTurnRes));
             fMoveResXY = Xml.GetChildFloatAttribute(node, nameof(fMoveResXY));
             fMoveResZ = Xml.GetChildFloatAttribute(node, nameof(fMoveResZ));
+        }
+
+        public override XmlNode Export(XmlDocument document)
+        {
+            var item = document.CreateElement("Item");
+
+            item.SetAttribute("type", type);
+
+            document.AddChildWithAttribute(item, nameof(fPitchMult), fPitchMult);
+            document.AddChildWithAttribute(item, nameof(fPitchAngle), fPitchAngle);
+            document.AddChildWithAttribute(item, nameof(fYawMult), fYawMult);
+            document.AddChildWithAttribute(item, nameof(fDiveSpeed), fDiveSpeed);
+            document.AddChildWithAttribute(item, nameof(fRollMult), fRollMult);
+            document.AddChildWithAttribute(item, nameof(fRollStab), fRollStab);
+            document.AddChildWithAttribute(item, nameof(vTurnRes), vTurnRes);
+            document.AddChildWithAttribute(item, nameof(fMoveResXY), fMoveResXY);
+            document.AddChildWithAttribute(item, nameof(fMoveResZ), fMoveResZ);
+
+            return item;
         }
     }
 
@@ -409,6 +584,25 @@
             fAttachRaiseZ = Xml.GetChildFloatAttribute(node, nameof(fAttachRaiseZ));
             fPosConstraintMassRatio = Xml.GetChildFloatAttribute(node, nameof(fPosConstraintMassRatio));
         }
+
+        public override XmlNode Export(XmlDocument document)
+        {
+            var item = document.CreateElement("Item");
+
+            item.SetAttribute("type", type);
+
+            document.AddChildWithAttribute(item, nameof(fAttachLimitPitch), fAttachLimitPitch);
+            document.AddChildWithAttribute(item, nameof(fAttachLimitRoll), fAttachLimitRoll);
+            document.AddChildWithAttribute(item, nameof(fAttachLimitYaw), fAttachLimitYaw);
+            document.AddChildWithAttribute(item, nameof(fUprightSpringConstant), fUprightSpringConstant);
+            document.AddChildWithAttribute(item, nameof(fUprightDampingConstant), fUprightDampingConstant);
+            document.AddChildWithAttribute(item, nameof(fAttachedMaxDistance), fAttachedMaxDistance);
+            document.AddChildWithAttribute(item, nameof(fAttachedMaxPenetration), fAttachedMaxPenetration);
+            document.AddChildWithAttribute(item, nameof(fAttachRaiseZ), fAttachRaiseZ);
+            document.AddChildWithAttribute(item, nameof(fPosConstraintMassRatio), fPosConstraintMassRatio);
+
+            return item;
+        }
     }
 
     [TC(typeof(EXP))]
@@ -424,6 +618,19 @@
             Slot = Xml.GetChildIntAttribute(node, nameof(Slot));
             Index = Xml.GetChildIntAttribute(node, nameof(Index));
             Value = Xml.GetChildFloatAttribute(node, nameof(Value));
+        }
+
+        public override XmlNode Export(XmlDocument document)
+        {
+            var item = document.CreateElement("Item");
+
+            item.SetAttribute("type", type);
+
+            document.AddChildWithAttribute(item, nameof(Slot), Slot);
+            document.AddChildWithAttribute(item, nameof(Index), Index);
+            document.AddChildWithAttribute(item, nameof(Value), Value);
+
+            return item;
         }
     }
 
@@ -462,6 +669,34 @@
             AdvancedData = GetCAdvancedDataArray(node, nameof(AdvancedData));
         }
 
+        public override XmlNode Export(XmlDocument document)
+        {
+            var item = document.CreateElement("Item");
+
+            item.SetAttribute("type", type);
+
+            document.AddChildWithAttribute(item, nameof(fBackEndPopUpCarImpulseMult), fBackEndPopUpCarImpulseMult);
+            document.AddChildWithAttribute(item, nameof(fBackEndPopUpBuildingImpulseMult), fBackEndPopUpBuildingImpulseMult);
+            document.AddChildWithAttribute(item, nameof(fBackEndPopUpMaxDeltaSpeed), fBackEndPopUpMaxDeltaSpeed);
+            document.AddChildWithAttribute(item, nameof(fCamberFront), fCamberFront);
+            document.AddChildWithAttribute(item, nameof(fCastor), fCastor);
+            document.AddChildWithAttribute(item, nameof(fToeFront), fToeFront);
+            document.AddChildWithAttribute(item, nameof(fCamberRear), fCamberRear);
+            document.AddChildWithAttribute(item, nameof(fToeRear), fToeRear);
+            document.AddChildWithAttribute(item, nameof(fEngineResistance), fEngineResistance);
+            document.AddChildWithAttribute(item, nameof(fMaxDriveBiasTransfer), fMaxDriveBiasTransfer);
+            document.AddChildWithAttribute(item, nameof(fJumpForceScale), fJumpForceScale);
+            document.AddChildInnerText(item, nameof(strAdvancedFlags), strAdvancedFlags);
+
+            var root = document.CreateElement(nameof(AdvancedData));
+
+            foreach (var advandedData in AdvancedData) { root.AppendChild(advandedData.Export(document)); }
+
+            item.AppendChild(root);
+
+            return item;
+        }
+
         private static CAdvancedData[] GetCAdvancedDataArray(XmlNode node, string childName)
         {
             var tempArray = new List<CAdvancedData>();
@@ -491,6 +726,15 @@
         public override void Load(XmlNode node)
         {
         }
+
+        public override XmlNode Export(XmlDocument document)
+        {
+            var item = document.CreateElement("Item");
+
+            item.SetAttribute("type", type);
+
+            return item;
+        }
     }
 
     [TC(typeof(EXP))]
@@ -511,8 +755,8 @@
 
         public override void Load(XmlNode node)
         {
-            fLeftPontoonComponentId = Xml.GetChildIntInnerText(node, nameof(fLeftPontoonComponentId));
-            fRightPontoonComponentId = Xml.GetChildIntInnerText(node, nameof(fRightPontoonComponentId));
+            fLeftPontoonComponentId = Xml.GetChildIntAttribute(node, nameof(fLeftPontoonComponentId));
+            fRightPontoonComponentId = Xml.GetChildIntAttribute(node, nameof(fRightPontoonComponentId));
             fPontoonBuoyConst = Xml.GetChildFloatAttribute(node, nameof(fPontoonBuoyConst));
             fPontoonSampleSizeFront = Xml.GetChildFloatAttribute(node, nameof(fPontoonSampleSizeFront));
             fPontoonSampleSizeMiddle = Xml.GetChildFloatAttribute(node, nameof(fPontoonSampleSizeMiddle));
@@ -522,6 +766,27 @@
             fPontoonVerticalDampingCoefficientUp = Xml.GetChildFloatAttribute(node, nameof(fPontoonVerticalDampingCoefficientUp));
             fPontoonVerticalDampingCoefficientDown = Xml.GetChildFloatAttribute(node, nameof(fPontoonVerticalDampingCoefficientDown));
             fKeelSphereSize = Xml.GetChildFloatAttribute(node, nameof(fKeelSphereSize));
+        }
+
+        public override XmlNode Export(XmlDocument document)
+        {
+            var item = document.CreateElement("Item");
+
+            item.SetAttribute("type", type);
+
+            document.AddChildWithAttribute(item, nameof(fLeftPontoonComponentId), fLeftPontoonComponentId);
+            document.AddChildWithAttribute(item, nameof(fRightPontoonComponentId), fRightPontoonComponentId);
+            document.AddChildWithAttribute(item, nameof(fPontoonBuoyConst), fPontoonBuoyConst);
+            document.AddChildWithAttribute(item, nameof(fPontoonSampleSizeFront), fPontoonSampleSizeFront);
+            document.AddChildWithAttribute(item, nameof(fPontoonSampleSizeMiddle), fPontoonSampleSizeMiddle);
+            document.AddChildWithAttribute(item, nameof(fPontoonSampleSizeRear), fPontoonSampleSizeRear);
+            document.AddChildWithAttribute(item, nameof(fPontoonLengthFractionForSamples), fPontoonLengthFractionForSamples);
+            document.AddChildWithAttribute(item, nameof(fPontoonDragCoefficient), fPontoonDragCoefficient);
+            document.AddChildWithAttribute(item, nameof(fPontoonVerticalDampingCoefficientUp), fPontoonVerticalDampingCoefficientUp);
+            document.AddChildWithAttribute(item, nameof(fPontoonVerticalDampingCoefficientDown), fPontoonVerticalDampingCoefficientDown);
+            document.AddChildWithAttribute(item, nameof(fKeelSphereSize), fKeelSphereSize);
+
+            return item;
         }
     }
 
@@ -551,7 +816,7 @@
 
         public override void Load(XmlNode node)
         {
-            mode = Xml.GetChildIntInnerText(node, nameof(mode));
+            mode = Xml.GetChildIntAttribute(node, nameof(mode));
             fLiftCoefficient = Xml.GetChildFloatAttribute(node, nameof(fLiftCoefficient));
             fMinLiftVelocity = Xml.GetChildFloatAttribute(node, nameof(fMinLiftVelocity));
             fDragCoefficient = Xml.GetChildFloatAttribute(node, nameof(fDragCoefficient));
@@ -570,6 +835,35 @@
             fMinSpeedForThrustFalloff = Xml.GetChildFloatAttribute(node, nameof(fMinSpeedForThrustFalloff));
             fBrakingThrustScale = Xml.GetChildFloatAttribute(node, nameof(fBrakingThrustScale));
             strFlags = Xml.GetChildInnerText(node, nameof(strFlags));
+        }
+
+        public override XmlNode Export(XmlDocument document)
+        {
+            var item = document.CreateElement("Item");
+
+            item.SetAttribute("type", type);
+
+            document.AddChildWithAttribute(item, nameof(mode), mode);
+            document.AddChildWithAttribute(item, nameof(fLiftCoefficient), fLiftCoefficient);
+            document.AddChildWithAttribute(item, nameof(fMinLiftVelocity), fMinLiftVelocity);
+            document.AddChildWithAttribute(item, nameof(fDragCoefficient), fDragCoefficient);
+            document.AddChildWithAttribute(item, nameof(fMaxPitchTorque), fMaxPitchTorque);
+            document.AddChildWithAttribute(item, nameof(fMaxSteeringRollTorque), fMaxSteeringRollTorque);
+            document.AddChildWithAttribute(item, nameof(fMaxThrust), fMaxThrust);
+            document.AddChildWithAttribute(item, nameof(fYawTorqueScale), fYawTorqueScale);
+            document.AddChildWithAttribute(item, nameof(fRollTorqueScale), fRollTorqueScale);
+            document.AddChildWithAttribute(item, nameof(fTransitionDuration), fTransitionDuration);
+            document.AddChildWithAttribute(item, nameof(fPitchTorqueScale), fPitchTorqueScale);
+            document.AddChildWithAttribute(item, nameof(vecAngularDamping), vecAngularDamping);
+            document.AddChildWithAttribute(item, nameof(vecAngularDampingMin), vecAngularDampingMin);
+            document.AddChildWithAttribute(item, nameof(vecLinearDamping), vecLinearDamping);
+            document.AddChildWithAttribute(item, nameof(vecLinearDampingMin), vecLinearDampingMin);
+            document.AddChildWithAttribute(item, nameof(fHoverVelocityScale), fHoverVelocityScale);
+            document.AddChildWithAttribute(item, nameof(fMinSpeedForThrustFalloff), fMinSpeedForThrustFalloff);
+            document.AddChildWithAttribute(item, nameof(fBrakingThrustScale), fBrakingThrustScale);
+            document.AddChildInnerText(item, nameof(strFlags), strFlags);
+
+            return item;
         }
     }
 
@@ -625,7 +919,7 @@
         public string strHandlingFlags { get; set; }
         public string strDamageFlags { get; set; }
         public string AIHandling { get; set; }
-        public SubHandlingData[] SubHandlingData { get; set; }
+        public SubHandlingData[] SubHandlingData { get; set; } = { };
         public float fWeaponDamageScaledToVehHealthMult { get; set; }
 
         public void Load(XmlNode node)
@@ -634,7 +928,7 @@
             fMass = Xml.GetChildFloatAttribute(node, nameof(fMass));
             fInitialDragCoeff = Xml.GetChildFloatAttribute(node, nameof(fInitialDragCoeff));
             fPercentSubmerged = Xml.GetChildFloatAttribute(node, nameof(fPercentSubmerged));
-            vecCentreOfMassOffset = Xml.GetChildVector3Attributes(node, nameof(fPercentSubmerged));
+            vecCentreOfMassOffset = Xml.GetChildVector3Attributes(node, nameof(vecCentreOfMassOffset));
             vecInertiaMultiplier = Xml.GetChildVector3Attributes(node, nameof(vecInertiaMultiplier));
             fDriveBiasFront = Xml.GetChildFloatAttribute(node, nameof(fDriveBiasFront));
             nInitialDriveGears = Xml.GetChildIntInnerText(node, nameof(nInitialDriveGears));
@@ -682,6 +976,80 @@
             AIHandling = Xml.GetChildInnerText(node, nameof(AIHandling));
             SubHandlingData = GetSubHandlingDataArray(node, nameof(SubHandlingData));
             fWeaponDamageScaledToVehHealthMult = Xml.GetChildFloatAttribute(node, nameof(fWeaponDamageScaledToVehHealthMult));
+        }
+
+        public XmlNode Export(XmlDocument document)
+        {
+            var item = document.CreateElement("Item");
+
+            item.SetAttribute("type", "CHandlingData");
+
+            document.AddChildInnerText(item, nameof(handlingName), handlingName);
+            document.AddChildWithAttribute(item, nameof(fMass), fMass);
+            document.AddChildWithAttribute(item, nameof(fInitialDragCoeff), fInitialDragCoeff);
+            document.AddChildWithAttribute(item, nameof(vecCentreOfMassOffset), vecCentreOfMassOffset);
+            document.AddChildWithAttribute(item, nameof(vecInertiaMultiplier), vecInertiaMultiplier);
+            document.AddChildWithAttribute(item, nameof(fDriveBiasFront), fDriveBiasFront);
+            document.AddChildWithAttribute(item, nameof(nInitialDriveGears), nInitialDriveGears);
+            document.AddChildWithAttribute(item, nameof(fInitialDriveForce), fInitialDriveForce);
+            document.AddChildWithAttribute(item, nameof(fDriveInertia), fDriveInertia);
+            document.AddChildWithAttribute(item, nameof(fClutchChangeRateScaleUpShift), fClutchChangeRateScaleUpShift);
+            document.AddChildWithAttribute(item, nameof(fClutchChangeRateScaleDownShift), fClutchChangeRateScaleDownShift);
+            document.AddChildWithAttribute(item, nameof(fInitialDriveMaxFlatVel), fInitialDriveMaxFlatVel);
+            document.AddChildWithAttribute(item, nameof(fBrakeForce), fBrakeForce);
+            document.AddChildWithAttribute(item, nameof(fBrakeBiasFront), fBrakeBiasFront);
+            document.AddChildWithAttribute(item, nameof(fHandBrakeForce), fHandBrakeForce);
+            document.AddChildWithAttribute(item, nameof(fSteeringLock), fSteeringLock);
+            document.AddChildWithAttribute(item, nameof(fTractionCurveMax), fTractionCurveMax);
+            document.AddChildWithAttribute(item, nameof(fTractionCurveMin), fTractionCurveMin);
+            document.AddChildWithAttribute(item, nameof(fTractionCurveLateral), fTractionCurveLateral);
+            document.AddChildWithAttribute(item, nameof(fTractionSpringDeltaMax), fTractionSpringDeltaMax);
+            document.AddChildWithAttribute(item, nameof(fLowSpeedTractionLossMult), fLowSpeedTractionLossMult);
+            document.AddChildWithAttribute(item, nameof(fCamberStiffnesss), fCamberStiffnesss);
+            document.AddChildWithAttribute(item, nameof(fTractionBiasFront), fTractionBiasFront);
+            document.AddChildWithAttribute(item, nameof(fTractionLossMult), fTractionLossMult);
+            document.AddChildWithAttribute(item, nameof(fSuspensionForce), fSuspensionForce);
+            document.AddChildWithAttribute(item, nameof(fSuspensionCompDamp), fSuspensionCompDamp);
+            document.AddChildWithAttribute(item, nameof(fSuspensionReboundDamp), fSuspensionReboundDamp);
+            document.AddChildWithAttribute(item, nameof(fSuspensionUpperLimit), fSuspensionUpperLimit);
+            document.AddChildWithAttribute(item, nameof(fSuspensionLowerLimit), fSuspensionLowerLimit);
+            document.AddChildWithAttribute(item, nameof(fSuspensionRaise), fSuspensionRaise);
+            document.AddChildWithAttribute(item, nameof(fSuspensionBiasFront), fSuspensionBiasFront);
+            document.AddChildWithAttribute(item, nameof(fAntiRollBarForce), fAntiRollBarForce);
+            document.AddChildWithAttribute(item, nameof(fAntiRollBarBiasFront), fAntiRollBarBiasFront);
+            document.AddChildWithAttribute(item, nameof(fRollCentreHeightFront), fRollCentreHeightFront);
+            document.AddChildWithAttribute(item, nameof(fRollCentreHeightRear), fRollCentreHeightRear);
+            document.AddChildWithAttribute(item, nameof(fCollisionDamageMult), fCollisionDamageMult);
+            document.AddChildWithAttribute(item, nameof(fWeaponDamageMult), fWeaponDamageMult);
+            document.AddChildWithAttribute(item, nameof(fDeformationDamageMult), fDeformationDamageMult);
+            document.AddChildWithAttribute(item, nameof(fEngineDamageMult), fEngineDamageMult);
+            document.AddChildWithAttribute(item, nameof(fPetrolTankVolume), fPetrolTankVolume);
+            document.AddChildWithAttribute(item, nameof(fOilVolume), fOilVolume);
+            document.AddChildWithAttribute(item, nameof(fSeatOffsetDistX), fSeatOffsetDistX);
+            document.AddChildWithAttribute(item, nameof(fSeatOffsetDistY), fSeatOffsetDistY);
+            document.AddChildWithAttribute(item, nameof(fSeatOffsetDistZ), fSeatOffsetDistZ);
+            document.AddChildWithAttribute(item, nameof(nMonetaryValue), nMonetaryValue);
+            document.AddChildWithAttribute(item, nameof(strModelFlags), strModelFlags);
+            document.AddChildWithAttribute(item, nameof(strHandlingFlags), strHandlingFlags);
+            document.AddChildWithAttribute(item, nameof(strDamageFlags), strDamageFlags);
+            document.AddChildWithAttribute(item, nameof(AIHandling), AIHandling);
+            document.AddChildWithAttribute(item, nameof(fWeaponDamageScaledToVehHealthMult), fWeaponDamageScaledToVehHealthMult);
+
+            var node = document.CreateElement(nameof(SubHandlingData));
+
+            foreach (var subHandlingData in SubHandlingData)
+            {
+                node.AppendChild(subHandlingData.Export(document));
+            }
+
+            for (var i = SubHandlingData.Length; i < 3; i++)
+            {
+                document.AddChildEmptyItem(node);
+            }
+
+            item.AppendChild(node);
+
+            return item;
         }
 
         private static SubHandlingData[] GetSubHandlingDataArray(XmlNode node, string childName)
