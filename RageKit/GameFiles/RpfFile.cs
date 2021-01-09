@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace RageKit.GameFiles
 {
+    using System.Xml;
 
     public class RpfFile
     {
@@ -2745,5 +2746,10 @@ namespace RageKit.GameFiles
     public interface ExportFile
     {
         byte[] Export();
+    }
+
+    public interface XmlExportFile
+    {
+        XmlNode Export(XmlDocument document);
     }
 }

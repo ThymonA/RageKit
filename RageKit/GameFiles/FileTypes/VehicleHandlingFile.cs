@@ -81,7 +81,7 @@
         }
     }
 
-    public abstract class SubHandlingData
+    public abstract class SubHandlingData : XmlExportFile
     {
         public abstract string type { get; }
 
